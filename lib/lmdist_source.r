@@ -1,13 +1,16 @@
-# lgd_source.r
-# usage : source('lgd_source.r')
+# lmdist_source.r
+# usage : source('lmdist_source.r')
 
 
 ##### Functions #####
-"lg.dist" <- function(d, neighborhood.radius=NULL, weighted=TRUE, smooth=FALSE, epsilon=0.05, phi=0.10) {
+"lm.dist" <- function(d, neighborhood.radius=NULL, weighted=TRUE, smooth=FALSE, epsilon=0.05, phi=0.10) {
   # This master function calculates distances based on connected graph of neighborhoods
   # d : distance object to be adjusted
   # neighborhood.radius : radius to determine neighborhoods (NULL if algorithm should pick)
   # weighted : True/False use weighted edges in graph (recommended: TRUE)
+  # smooth : True/False smooth results of multiple radii, specifically all valid radii in neighborhood.radius (default: False)
+  # epsilon : (default: 0.05)
+  # phi : Percentage of samples which must fall within (default: 0.10)
   
   # Verify parameter validity
   ## distance object or distance matrix must be provided
@@ -17,6 +20,9 @@
     } else {
       stop("'d' must be a distance object or symmetric distance matrix.")
     }
+  }
+  if (dim(as.matrix(d))[1] <= 10 ) {
+    stop("'d' is too small, recommended to use a larger dataset, minimum of 10 samples.")
   }
   ## neighborhood radius must be a double or list of doubles or NULL (default)
   if (typeof(neighborhood.radius) != "double" & suppressWarnings(any(is.na(as.double(neighborhood.radius)) == TRUE))) {
@@ -31,30 +37,31 @@
     stop("'weighted' must be logical type TRUE (default) or FALSE.")
   }
   ## make sure epsilon does not make it impossible to improve
-  tmp <- cmdscale(d, k=2)
+  tmp <- cmdscale(d, k=5)
   tmp <- round(cor(dist(tmp), as.dist(d), method="pearson"),3)
-  if ((epsilon + tmp) > 0.995 ) {
-    warning(paste0("Epsilon too large for dataset, updated to ", round((1-tmp)/3, 3)))
-    epsilon <- round((1-tmp)/3, 3) # smaller epsilon (for smaller datasets with high correlation but arch present)
+  if (((epsilon + tmp) > 0.995) & tmp < 0.99 ) {
+    warning(paste0("Epsilon too large for dataset, updated to ", round((1-tmp)/2, 3)))
+    epsilon <- round((1-tmp)/2, 3) # smaller epsilon (for smaller datasets with high correlation but arch present)
   }
 
   #  Create connected graph with provided neighborhood range(s)
   ix <- 1         # index
-  lgd <- NULL     # distances
+  lmd <- NULL     # distances
   curr_corr <- -1 # optimization function score
   curr_ratio <- 1 # ratio degree:n
   curr_radius <- neighborhood.sizes[1]
   mylist <- list()
   while(ix <= length(neighborhood.sizes)){
     ns <- neighborhood.sizes[ix]
-    out <- lg.evaluate(d, neighborhood.size=ns, weighted=weighted) # list(lgd, is.valid, ratio, corr)
+    out <- lm.evaluate(d, neighborhood.size=ns, weighted=weighted) # list(lmd, is.valid, ratio, corr)
     if (!out[[2]]) {
       stop(paste0('Graph is invalid (r = ',ns,'), check all parameters are valid or try a different radius.'))
     }
     if (out[[3]] < phi) break
     if ((out[[3]] >= phi) & (out[[4]] > (curr_corr + epsilon))) {
-      print(paste0("new best r found --> ", round(ns,3)))
-      lgd <- out[[1]]
+      if (ix == 1) {print(paste0("setting initial r as best --> ", round(ns,3)))}
+      else {print(paste0("new best r found --> ", round(ns,3)))}
+      lmd <- out[[1]]
       curr_ratio <- out[[3]]
       curr_corr <- out[[4]]
       curr_radius <- ns
@@ -65,32 +72,33 @@
   # Smooth results if desired
   if (smooth == TRUE) {
     if (length(mylist) > 1) {
-      lgd <- lg.smooth(mylist, which(neighborhood.sizes == curr_radius), neighborhood.sizes[1:length(mylist)])
+      lmd <- lm.smooth(mylist, which(neighborhood.sizes == curr_radius), neighborhood.sizes[1:length(mylist)])
     } else {
       # adding up to 12 on each side of the one provided neighborhood
       tmp_rvals <- round(seq(max(d), curr_radius, length.out=12), 3)
       tmp_rvals <- c(tmp_rvals, round(seq(curr_radius, min(d), length.out=12), 3))
       val_rvals <- c(curr_radius)
       for (r in tmp_rvals) {
-        tmp_out <- lg.evaluate(d, neighborhood.size=r, weighted=weighted)
+        tmp_out <- lm.evaluate(d, neighborhood.size=r, weighted=weighted)
         if (tmp_out[[3]] >= phi) {
           mylist <- append(mylist, list(tmp_out[[1]]))
           val_rvals <- c(val_rvals, r)
         }
       }
-      lgd <- lg.smooth(mylist, 1, val_rvals)
+      lmd <- lm.smooth(mylist, 1, val_rvals)
     }
   }
+
   # Return dist object
-  if (is.null(lgd)) {stop(paste0("Radius ", round(ns, 3)," resulted in null graph. Try larger radius.")); return(NULL);}
-  return(as.dist(lgd))
+  if (is.null(lmd)) {stop(paste0("Radius ", round(ns, 3)," resulted in null graph. Try larger radius.")); return(NULL);}
+  return(as.dist(lmd))
 }
 
-"lg.evaluate" <- function(d, neighborhood.size=NULL, weighted=TRUE) {
+"lm.evaluate" <- function(d, neighborhood.size=NULL, weighted=TRUE) {
   # For a given radius value, returns graph & relevant information
   is.valid <- FALSE         # default, must be proven otherwise
   n <- dim(as.matrix(d))[1] # number of samples
-  g <- lg.graph(d, neighborhood.size=neighborhood.size, weighted=weighted)
+  g <- lm.graph(d, neighborhood.size=neighborhood.size, weighted=weighted)
   if (clusters(g)$no == 1) {
     is.valid <- TRUE #eigs <- eigen(graph.laplacian(g), only.values=TRUE)$values
   } else {
@@ -102,22 +110,30 @@
   }
   ratio <- mean(degree(g)) / n # record degree:n ratio
   if(is.valid) {
-    lg_d <- shortest.paths(g)
-    pc <- cmdscale(lg_d, k=3, eig=F)
-    corr <- round(cor(dist(pc), as.dist(lg_d), method="pearson"),3) # use correlation b/w PC & LGD dists as optimization func
+    # Compute the LMDist-adjusted distances
+    lm_d <- shortest.paths(g)
+    # Determine the best number of dimensions of PCoA with which to compare, the fewest number of dimensions (between 2 and 10) to describe >80% variance
+    pc <- suppressWarnings(cmdscale(lm_d, k=10, eig=T))
+    scree <- (pc$eig[1:10] / sum(pc$eig))
+    scree_tot <- c()
+    for (i in 1:length(scree)) { scree_tot <- c(scree_tot, sum(scree[1:i])) }
+    ndim <- min(which(scree_tot >= 0.8))
+    if (ndim == 1) { ndim <- 2 }
+    corr <- round(cor(dist(pc$points[,1:ndim]), as.dist(lm_d), method="pearson"),3) # use correlation b/w PC & lmd dists as optimization func
   } else {
-    lg_d <- NULL
+    lm_d <- NULL
     corr <- -1
   }
-  ## Print igraph
+  ## Debugging feature : Print igraph
   # png(paste0("results/igraphs_gif/r_",round(neighborhood.radius,4),".png"), width=600, height=600)
   # plot(g, vertex.label=NA, vertex.color="purple", vertex.size=8,
   #      main=paste0("r = ", round(neighborhood.radius,4)))
   # dev.off()
-  return(list(lg_d, is.valid, ratio, corr))
+  
+  return(list(lm_d, is.valid, ratio, corr))
 }
 
-"lg.graph" <- function(d, neighborhood.size=NULL, weighted=TRUE) {
+"lm.graph" <- function(d, neighborhood.size=NULL, weighted=TRUE) {
   # Creates graph with provided neighborhood metric
   require('igraph', warn.conflicts=FALSE, quietly=TRUE)
   d <- as.matrix(d)
@@ -153,20 +169,19 @@
   return(g)
 }
 
-"lg.smooth" <- function (lgdlist, bestidx, rvals) {
+"lm.smooth" <- function (lmdlist, bestidx, rvals) {
   require('rdd', warn.conflicts=FALSE, quietly=TRUE)
-  if (is.null(lgdlist)) warning("Smoothing not possible, null list.")
+  if (is.null(lmdlist)) warning("Smoothing not possible, null list.")
   # Determine new distances as weighted mean of other r distance outputs
   ## (1) get weights centered at best r index
   ##     note: using a Gaussian with bandwidth ~15% of length
   wts <- kernelwts(1:length(rvals), center=bestidx, bw=ceiling(length(rvals)*0.15), kernel="gaussian")
   ## (2) per pairwise distance, get weighted mean
-  means <- lgdlist[[1]]    # temporarily set means to first distance object
-  for (i in 1:length(lgdlist[[1]])) {
-    x <- sapply(lgdlist, function (l) { l[[i]] })
+  means <- lmdlist[[1]]    # temporarily set means to first distance object
+  for (i in 1:length(lmdlist[[1]])) {
+    x <- sapply(lmdlist, function (l) { l[[i]] })
     means[i] <- weighted.mean(x, wts)
   }
   ## (3) return in a distance object
   return(as.dist(means))
 }
-
