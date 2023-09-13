@@ -12,9 +12,9 @@ As of now, the functions for using LMdist exist as R [^1] source code here on Gi
 ## Usage
 
 To use the relevant functions for LMdist, simply call the source file within your script using
-'''
+```
 source('/path/to/file/lmdist_source.r')
-'''
+```
 
 Below you will find descriptions of functions/parameters along with a more detailed tutorial.
 
@@ -48,7 +48,7 @@ Description of functions and parameters.
 
 Using the publicly available dune dataset [^2] from the vegan [^3] package, we demonstrate how the LMdist algorithm adjusts distances to more accurately depict sample relationships.
 
-'''r
+```r
 library(vegan)
 data(dune)
 data(dune.env)
@@ -62,14 +62,14 @@ dune.lmd <- lm.dist(dune.d)
 dune.pc.lmd <- cmdscale(dune.lmd, k=2, eig=F)
 plot(dune.pc.lmd, pch=16, cex=2, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E")[dune.env$Moisture], xlab="PC 1", ylab="PC 2", main="LMdist PCoA (dune, defaults)")
 legend("bottomleft", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), legend=levels(dune.env$Moisture), title="Moisture")
-'''
+```
 
 
 ### Iris tutorial
 
 Using the public iris dataset [^4], we see that LMdist does not adjust distances if pairwise distances are not necessarily oversaturated. However, we can override the default LMdist algorithm to adjust distances using a provided neighborhood radius value.
 
-'''r
+```r
 source("lmdist_source.r")
 set.seed(25)
 
@@ -93,9 +93,9 @@ iris.lmd <- lm.dist(iris.d, 2)
 iris.pc.lmd <- cmdscale(iris.lmd, k=2, eig=F)
 plot(iris.pc.lmd, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$Species)], xlab="PC 1", ylab="PC 2", main="LMdist PCA (iris, radius 2)")
 legend("bottomleft", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
-'''
+```
 
-[^2] Anderson, Edgar (1935). The irises of the Gaspe Peninsula, Bulletin of the American Iris Society, 59, 2–5.
+[^2] Batterink M. & Wijffels G. (1983): Een vergelijkend vegetatiekundig onderzoek naar de typologie en invloeden van het beheer van 1973 tot 1982 in de duinweilanden op Terschelling. Report Agricultural University, Department of Vegetation Science, Plant Ecology and Weed Science, Wageningen.
 
 [^3] Oksanen J, Simpson G, Blanchet F, Kindt R, Legendre P, Minchin P, O'Hara R, Solymos P, Stevens M, Szoecs E, Wagner H, Barbour M, Bedward M, Bolker B, Borcard D, Carvalho G, Chirico M, De Caceres M, Durand S, Evangelista H, FitzJohn R, Friendly M, Furneaux B, Hannigan G, Hill M, Lahti L, McGlinn D, Ouellette M, Ribeiro Cunha E, Smith T, Stier A, Ter Braak C, Weedon J (2022). *vegan: Community Ecology Package*. R package version 2.6-4, [https://CRAN.R-project.org/package=vegan](https://CRAN.R-project.org/package=vegan).
 
