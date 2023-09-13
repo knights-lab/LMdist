@@ -23,7 +23,7 @@ Below you will find descriptions of functions/parameters along with a more detai
 
 Description of functions and parameters.
 
-**lm.dist() :** Primary function for the LMdist algorithm, takes a distance object or matrix and returns an adjusted distance object of the same size, with values adjusted according to the local manifold. This is the only function a typical user will utilize, other functions included are helper functions called within 'lm.dist()'.
+**lm.dist() :** Primary function for the LMdist algorithm, takes a distance object or matrix and returns an adjusted distance object of the same size, with values adjusted according to the local manifold. This is the only function a typical user will utilize, other functions included are helper functions called within `lm.dist()`.
 
 | **Parameter** | **Description** |
 | ---------- | ---------- |
@@ -33,13 +33,13 @@ Description of functions and parameters.
 | epsilon | [optional, default: 0.05] Amount by which a smaller radius must be better correlated with the PCoA distances |
 | phi | [optional, default: 0.10] Minimum graph degree:n ratio for which a radius is considered valid. |
 
-**lm.evaluate() :** Helper function called within 'lm.dist()' which returns a graph & relevant information for a particular neighborhood radius.
+**lm.evaluate() :** Helper function called within `lm.dist()` which returns a graph & relevant information for a particular neighborhood radius.
 
-**lm.graph() :** Helper function called within 'lm.evaluate()' to generate the graph of nodes and edges using a particular neighborhood radius.
+**lm.graph() :** Helper function called within `lm.evaluate()` to generate the graph of nodes and edges using a particular neighborhood radius.
 
-**greedy.connect() :** Helper function called within 'lm.evaluate()' to greedily connect disconnected graph components using the minimum distance between these components, if needed.
+**greedy.connect() :** Helper function called within `lm.evaluate()` to greedily connect disconnected graph components using the minimum distance between these components, if needed.
 
-**lm.smooth() :** Helper function called within 'lm.dist()' to optionally smooth the results of multiple neighborhood radii.
+**lm.smooth() :** Helper function called within `lm.dist()` to optionally smooth the results of multiple neighborhood radii.
 
 
 ## Tutorial
