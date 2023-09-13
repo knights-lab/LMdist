@@ -2,11 +2,13 @@
 LMdist is an unsupervised algorithm for correcting oversaturated pairwise distance and dissimilarity measures. Compatible with any pairwise beta diversity measure, LMdist will uncover underlying environmental gradients and resolve arches/horseshoes in ordination.
 
 
+
 ## Installation
 
-As of now, the functions for using LMdist exist as R [^1] source code here on GitHub. To get started, download the source code file 'lib/lmdist_source.r' and place this file in the desired location on your machine.
+As of now, the functions for using LMdist exist as R [^1] source code here on GitHub. To get started, download the source code file `lib/lmdist_source.r` and place this file in the desired location on your machine.
 
-[^1]: The source code was made using R 4.3.1, other versions of R may be incompatible. To check your R version, enter 'R.version' in the console.
+[^1]: The source code was made using R 4.3.1, other versions of R may be incompatible. To check your R version, enter `R.version` in the console.
+
 
 
 ## Usage
@@ -17,6 +19,7 @@ source('/path/to/file/lmdist_source.r')
 ```
 
 Below you will find descriptions of functions/parameters along with a more detailed tutorial.
+
 
 
 ## Introduction
@@ -42,6 +45,7 @@ Description of functions and parameters.
 **lm.smooth() :** Helper function called within `lm.dist()` to optionally smooth the results of multiple neighborhood radii.
 
 
+
 ## Tutorial
 
 ### Dune Tutorial
@@ -62,11 +66,21 @@ dune.d <- vegdist(dune, method="bray")
 dune.pc <- cmdscale(dune.d, k=2, eig=F)
 plot(dune.pc, pch=16, cex=2, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E")[dune.env$Moisture], xlab="PC 1", ylab="PC 2", main="Original PCoA (dune)")
 legend("topright", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), legend=levels(dune.env$Moisture), title="Moisture")
+```
 
+```r
 # Adjust the distances using LMdist, then visualize the adjusted distances with PCoA.
 dune.lmd <- lm.dist(dune.d)
 dune.pc.lmd <- cmdscale(dune.lmd, k=2, eig=F)
 plot(dune.pc.lmd, pch=16, cex=2, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E")[dune.env$Moisture], xlab="PC 1", ylab="PC 2", main="LMdist PCoA (dune, defaults)")
+legend("bottomleft", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), legend=levels(dune.env$Moisture), title="Moisture")
+```
+
+```r
+# Use the "smooth" option to get combined results from multiple radii, that way not just one radius value is used.
+dune.lmd <- lm.dist(dune.d, smooth=T)
+dune.pc.lmd <- cmdscale(dune.lmd, k=2, eig=F)
+plot(dune.pc.lmd, pch=16, cex=2, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E")[dune.env$Moisture], xlab="PC 1", ylab="PC 2", main="LMdist PCoA (dune, smoothed)")
 legend("bottomleft", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), legend=levels(dune.env$Moisture), title="Moisture")
 ```
 
@@ -88,7 +102,7 @@ iris.pc <- cmdscale(iris.d, k=2, eig=F)
 plot(iris.pc, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$Species)], xlab="PC 1", ylab="PC 2", main="Original PCA (iris)")
 legend("bottomright", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
 
-# The default LMdist algorithm tries 25 neighborhood radii and returns the best fit for the data.
+# The default LMdist algorithm tries 50 neighborhood radii and returns the best fit for the data.
 # In the iris dataset, you'll note the algorithm does not adjust distances, because the distances are not oversaturated.
 iris.lmd <- lm.dist(iris.d)
 iris.pc.lmd <- cmdscale(iris.lmd, k=2, eig=F)
@@ -102,6 +116,7 @@ iris.pc.lmd <- cmdscale(iris.lmd, k=2, eig=F)
 plot(iris.pc.lmd, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$Species)], xlab="PC 1", ylab="PC 2", main="LMdist PCA (iris, radius 2)")
 legend("bottomleft", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
 ```
+
 
 [^2]: Batterink M. & Wijffels G. (1983): Een vergelijkend vegetatiekundig onderzoek naar de typologie en invloeden van het beheer van 1973 tot 1982 in de duinweilanden op Terschelling. Report Agricultural University, Department of Vegetation Science, Plant Ecology and Weed Science, Wageningen.
 
