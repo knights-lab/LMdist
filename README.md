@@ -1,9 +1,11 @@
 # LMdist
 LMdist is an unsupervised algorithm for correcting oversaturated pairwise distance and dissimilarity measures. Compatible with any pairwise beta diversity measure, LMdist will uncover underlying environmental gradients and resolve arches/horseshoes in ordination.
 
+<br/>
 
 ---
 
+<br/>
 
 ## Installation
 
@@ -11,9 +13,11 @@ As of now, the functions for using LMdist exist as R [^1] source code here on Gi
 
 [^1]: The source code was made using R 4.3.1, other versions of R may be incompatible. To check your R version, enter `R.version` in the console.
 
+<br/>
 
 ---
 
+<br/>
 
 ## Usage
 
@@ -28,9 +32,11 @@ lm.dist(distance_object)
 ```
 Continue below for descriptions of functions/parameters along with a more detailed tutorial.
 
+<br/>
 
 ---
 
+<br/>
 
 ## Introduction
 
@@ -55,9 +61,11 @@ Description of functions and parameters.
 
 `lm.smooth()` : Helper function called within `lm.dist()` to optionally smooth the results of multiple neighborhood radii.
 
+<br/>
 
 ---
 
+<br/>
 
 ## Tutorials
 
@@ -86,8 +94,9 @@ dune.pc <- cmdscale(dune.d, k=2, eig=F)
 plot(dune.pc, pch=16, cex=2, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E")[dune.env$Moisture], xlab="PC 1", ylab="PC 2", main="Original PCoA (dune)")
 legend("topright", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), legend=levels(dune.env$Moisture), title="Moisture")
 ```
-![PCoA of dune dataset with Bray-Curtis dissimilarity. Samples arranged in a sparse arch formation.](tutorial_figs/dune_original_pcoa.png "PCoA (dune data)")
-
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/dune_original_pcoa.png">
+</p>
 
 We can see that the dataset may be presenting an arch-like geometry, largely driven by the moisture gradient. Since LMdist works best in correcting oversaturated distances, we can look at the distribution of distances to see if there is a bounded effect here.
 
@@ -95,7 +104,9 @@ We can see that the dataset may be presenting an arch-like geometry, largely dri
 # Distribution of distances
 plot(hist(dune.d, breaks=12), main="Distribution of Dissimilarities (dune)", xlab="Bray-Curtis Dissimilarity")
 ```
-![Distribution of Bray-Curtis dissimilarities present a slight left skew.](tutorial_figs/dune_original_distribution.png "Distribution of Bray-Curtis dissimilarities (dune data)")
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/dune_original_distribution.png">
+</p>
 
 There appears to be a very slight left skew in this dataset, so we can try using LMdist to adjust distances. We are using the default algorithm which will try 50 radii values for adjusting distances and pick the one which represents true pairwise distances the best.
 
@@ -119,17 +130,18 @@ legend("bottomleft", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), leg
 # Distribution of LMdist-adjusted distances
 plot(hist(dune.lmd, breaks=12), main="Distribution of LMdist-adjustment (dune)", xlab="LMdist-adjusted (r=0.543)")
 ```
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/dune_lmdist_pcoa.png">
+  <img width="400" height="400" src="tutorial_figs/dune_lmdist_distribution.png">
+</p>
 
-![PCoA of dune dataset with Lmdist-adjustment. Samples are more linearly arranged.](tutorial_figs/dune_lmdist_pcoa.png "LMdist PCoA (dune data)")
 
 The adjusted plot appears to have flattened the curve from the original PCoA along the x-axis (PC 1). Other variation in the samples is now represented by the second axis (PC 2), notably the variation in low moisture samples.
-
-![LMdist distribution of dissimilarities in the dune dataset reduces left skew.](tutorial_figs/dune_lmdist_distribution.png "LMdist distribution of dissimilarities (dune data)")
 
 The distribution of distances has reduced left skew after adjustment with LMdist.
 
 
-While a simple solution, it may be difficult to trust one radius value alone. Researchers may therefore choose to apply an optional smoothing to adjust distances according to more than one radius value by a Gaussian weighting.
+While a simple solution, it may be difficult to trust one radius value alone. **Researchers may therefore choose to apply an optional smoothing** to adjust distances according to more than one radius value by a Gaussian weighted averaging.
 
 ```r
 # Use the "smooth" option to get combined results from multiple radii, thereby not placing complete trust in just one radius.
@@ -151,20 +163,22 @@ legend("bottomleft", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), leg
 # Distribution of LMdist-adjusted distances (with smoothing)
 plot(hist(dune.lmd, breaks=12), main="Distribution of LMdist-adjustment (dune, smooth)", xlab="LMdist-adjusted (r=0.543, smooth)")
 ```
-
-![PCoA of dune dataset with Lmdist-adjustment and smoothing. Samples are more linearly arranged.](tutorial_figs/dune_lmdist_pcoa.png "LMdist smooth PCoA (dune data)")
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/dune_lmdist_smooth_pcoa.png">
+  <img width="400" height="400" src="tutorial_figs/dune_lmdist_smooth_distribution.png">
+</p>
 
 The results are similar to the single best radius, but you may not small adjustments for individual samples, an effect induced by this weighted averaging of other radii.
 
-![LMdist distribution of dissimilarities in the dune dataset reduces left skew.](tutorial_figs/dune_lmdist_distribution.png "LMdist smooth distribution of dissimilarities (dune data)")
+The distribution of distances also resembles the default algorithm without accentuating particular distance values as seen before.
 
-The distribution of distances also resembles the default algorithm.
+**Smoothing can be applied to any LMdist output**, including a user-provided radius value. The next tutorial with the `iris` dataset walks through applying a user-defined radius.
 
-Smoothing can be applied to any LMdist output, including a user-provided radius value. The next tutorial with the `iris` dataset walks through applying a user-defined radius.
-
+<br/>
 
 ---
 
+<br/>
 
 ### Iris tutorial
 
@@ -187,8 +201,9 @@ iris.pc <- cmdscale(iris.d, k=2, eig=F)
 plot(iris.pc, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$Species)], xlab="PC 1", ylab="PC 2", main="Original PCA (iris)")
 legend("bottomright", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
 ```
-
-![PCoA of iris dataset with Euclidean distances forms three clusters by species.](tutorial_figs/iris_original_pcoa.png "PCoA (iris data)")
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/iris_original_pcoa.png">
+</p>
 
 Theses distances are also not oversaturated, no left skew is present.
 
@@ -196,8 +211,9 @@ Theses distances are also not oversaturated, no left skew is present.
 # Density of distances
 plot(hist(iris.d, breaks=20), main="Distribution of Distances (iris)", xlab="Euclidean Distances")
 ```
-
-![Distribution of Euclidean distances in iris dataset looks normally distributed.](tutorial_figs/iris_original_distribution.png "Distribution of Euclidean distances (iris data)")
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/iris_original_distribution.png">
+</p>
 
 It is therefore unsurprising that the LMdist default algorithm does not choose to adjust the distances, using a radius value of the maximum distance and therefore trusting all provided distances.
 
@@ -211,14 +227,15 @@ iris.lmd <- lm.dist(iris.d)
     [1] "setting initial r as best --> 7.085"
 ```
 
-```
+```r
 # Visualizing the output with PCA
 iris.pc.lmd <- cmdscale(iris.lmd, k=2, eig=F)
 plot(iris.pc.lmd, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$Species)], xlab="PC 1", ylab="PC 2", main="LMdist PCA (iris, defaults)")
 legend("bottomright", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
 ```
-
-![PCoA of iris dataset with LMdist-adjusted Euclidean distances is unchanged from original.](tutorial_figs/iris_lmdist_defaults_pcoa.png "LMdist PCoA (iris data, defaults)")
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/iris_lmdist_defaults_pcoa.png">
+</p>
 
 So, the pairwise relationships and subsequent PCA plot are unchanged. 
 
@@ -240,25 +257,23 @@ plot(iris.pc.lmd, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$S
 legend("bottomleft", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
 
 # Visualize the distribution of adjusted values
-plot(hist(iris.lmd, breaks=20), main="Distribution of LMdist (iris, r=2)", xlab="LMdist adjusted (r=2)")
+plot(hist(iris.lmd, breaks=20), main="Distribution of LMdist-adjustment (iris, r=2)", xlab="LMdist adjusted (r=2)")
 ```
-
-![PCoA of iris dataset with LMdist-adjusted Euclidean distances using radius 2 causes the setosa cluster to become tighter.](tutorial_figs/iris_lmdist_radius2_pcoa.png "LMdist PCoA (iris data, r=2)")
+<p align="center">
+  <img width="400" height="400" src="tutorial_figs/iris_lmdist_radius2_pcoa.png">
+  <img width="400" height="400" src="tutorial_figs/iris_lmdist_radius2_distribution.png">
+</p>
 
 The smaller radius seems to accentuate sample distances within the *Iris versicolor* and *Iris virginica* species, making the *Iris setosa* species appear very tightly clustered by comparison in PC1 and PC2.
-
-![Distribution of LMdist-adjusted Euclidean distances in iris dataset is similar to original.](tutorial_figs/iris_lmdist_radius2_distribution.png "Distribution of LMdist-adjusted Euclidean distances (iris, r=2)")
 
 The distribution of distances is largely unchanged because the distinctive species groups persisted.
 
 This example with the iris dataset shows how the LMdist algorithm may be used for exploration but is also an example of when the LMdist algorithm is not needed. The lack of oversaturation of distances means Euclidean distances are already representing sample relationships well (as expected from a dataset with only 4 initial dimensions).
 
 
----
-
 
 [^2]: Batterink M. & Wijffels G. (1983): Een vergelijkend vegetatiekundig onderzoek naar de typologie en invloeden van het beheer van 1973 tot 1982 in de duinweilanden op Terschelling. Report Agricultural University, Department of Vegetation Science, Plant Ecology and Weed Science, Wageningen.
 
 [^3]: Oksanen J, Simpson G, Blanchet F, Kindt R, Legendre P, Minchin P, O'Hara R, Solymos P, Stevens M, Szoecs E, Wagner H, Barbour M, Bedward M, Bolker B, Borcard D, Carvalho G, Chirico M, De Caceres M, Durand S, Evangelista H, FitzJohn R, Friendly M, Furneaux B, Hannigan G, Hill M, Lahti L, McGlinn D, Ouellette M, Ribeiro Cunha E, Smith T, Stier A, Ter Braak C, Weedon J (2022). *vegan: Community Ecology Package*. R package version 2.6-4, [https://CRAN.R-project.org/package=vegan](https://CRAN.R-project.org/package=vegan).
 
-[^4] Anderson, Edgar (1935). The irises of the Gaspe Peninsula, Bulletin of the American Iris Society, 59, 2–5.
+[^4]: Anderson, Edgar (1935). The irises of the Gaspe Peninsula, Bulletin of the American Iris Society, 59, 2–5.
