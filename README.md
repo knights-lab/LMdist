@@ -45,7 +45,7 @@ Description of functions and parameters.
 | weighted | [optional, default: True] True/False use weighted edges in graph |
 | epsilon | [optional, default: 0.05] Amount by which a smaller radius must be better correlated with the PCoA distances |
 | phi | [optional, default: 0.10] Minimum graph degree:n ratio for which a radius is considered valid. |
-| **smooth** | [optional, default: F] Smooth results of multiple radii around the chosen "best" radius value. Best radius value is set to neighborhood.radius if a single value is provided, and 25 radii around this value are added to create a weighted average for smoothed results. |
+| **smooth** | [optional, default: False] Smooth results of multiple radii around the chosen "best" radius value. Best radius value is set to neighborhood.radius if a single value is provided, and 25 radii around this value are added to create a weighted average for smoothed results. |
 
 `lm.evaluate()` : Helper function called within `lm.dist()` which returns a graph & relevant information for a particular neighborhood radius.
 
