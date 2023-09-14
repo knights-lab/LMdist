@@ -113,12 +113,14 @@ plot(hist(dune.lmd, breaks=12), main="Distribution of LMdist-adjustment (dune)",
 
 ![PCoA of dune dataset with Lmdist-adjustment. Samples are more linearly arranged.](tutorial_figs/dune_lmdist_pcoa.png "LMdist PCoA (dune data)")
 
-![LMdist distribution of dissimilarities in the dune dataset reduces left skew.](tutorial_figs/dune_lmdist_distribution.png "LMdist distribution of dissimilarities (dune data)")
-
-
 The adjusted plot appears to have flattened the curve from the original PCoA along the x-axis (PC 1). Other variation in the samples is now represented by the second axis (PC 2), notably the variation in low moisture samples.
 
-We may be wary to trust this one radius value alone, so we cna apply an optional smoothing to adjust distances according to more than one radius value by a Gaussian weighting.
+![LMdist distribution of dissimilarities in the dune dataset reduces left skew.](tutorial_figs/dune_lmdist_distribution.png "LMdist distribution of dissimilarities (dune data)")
+
+The distribution of distances has reduced left skew after adjustment with LMdist.
+
+
+While a simple solution, it may be difficult to trust one radius value alone. Researchers may therefore choose to apply an optional smoothing to adjust distances according to more than one radius value by a Gaussian weighting.
 
 ```r
 # Use the "smooth" option to get combined results from multiple radii, thereby not placing complete trust in just one radius.
@@ -143,9 +145,13 @@ plot(hist(dune.lmd, breaks=12), main="Distribution of LMdist-adjustment (dune, s
 
 ![PCoA of dune dataset with Lmdist-adjustment and smoothing. Samples are more linearly arranged.](tutorial_figs/dune_lmdist_pcoa.png "LMdist smooth PCoA (dune data)")
 
+The results are similar to the single best radius, but you may not small adjustments for individual samples, an effect induced by this weighted averaging of other radii.
+
 ![LMdist distribution of dissimilarities in the dune dataset reduces left skew.](tutorial_figs/dune_lmdist_distribution.png "LMdist smooth distribution of dissimilarities (dune data)")
 
-Smoothing can be applied to any LMdist output, including a user-provided radius value. The next tutorial walks through applying a user-defined radius.
+The distribution of distances also resembles the default algorithm.
+
+Smoothing can be applied to any LMdist output, including a user-provided radius value. The next tutorial with the `iris` dataset walks through applying a user-defined radius.
 
 
 
@@ -201,7 +207,11 @@ plot(iris.pc.lmd, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$S
 legend("bottomright", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
 ```
 
-So, the PCA plot and distribution of distances are unchanged. However, if we want to explore the dataset further by applying a particular radius value, we can do so with the "neighborhood.radius" parameter. Here, we use a radius value of 2.
+![PCoA of iris dataset with LMdist-adjusted Euclidean distances is unchanged from original.](tutorial_figs/iris_lmdist_defaults_pcoa.png "LMdist PCoA (iris data, defaults)")
+
+So, the pairwise relationships and subsequent PCA plot are unchanged. 
+
+However, if we want to explore the dataset further by applying a particular radius value, we can do so with the "neighborhood.radius" parameter. Here, we apply a radius value of 2.
 
 ```r
 # We can force the LMdist algorithm to adjust the pairwise distances by including a specific radius value (or values) to be used.
@@ -222,7 +232,13 @@ legend("bottomleft", pch=16, col=c("purple","orange","blue"), legend=levels(fact
 plot(hist(iris.lmd, breaks=20), main="Distribution of LMdist (iris, r=2)", xlab="LMdist adjusted (r=2)")
 ```
 
-The smaller radius seems to accentuate sample distances within the *Iris versicolor* and *Iris virginica* species, making the *Iris setosa* species appear very tightly clustered by comparison in PC1 and PC2. The distribution of distances is largely unchanged because the distinctive species groups persisted.
+![PCoA of iris dataset with LMdist-adjusted Euclidean distances using radius 2 causes the setosa cluster to become tighter.](tutorial_figs/iris_lmdist_radius2_pcoa.png "LMdist PCoA (iris data, r=2)")
+
+The smaller radius seems to accentuate sample distances within the *Iris versicolor* and *Iris virginica* species, making the *Iris setosa* species appear very tightly clustered by comparison in PC1 and PC2.
+
+![Distribution of LMdist-adjusted Euclidean distances in iris dataset is similar to original.](tutorial_figs/iris_lmdist_radius2_distribution.png "Distribution of LMdist-adjusted Euclidean distances (iris, r=2)")
+
+The distribution of distances is largely unchanged because the distinctive species groups persisted.
 
 This example with the iris dataset shows how the LMdist algorithm may be used for exploration but is also an example of when the LMdist algorithm is not needed. The lack of oversaturation of distances means Euclidean distances are already representing sample relationships well (as expected from a dataset with only 4 initial dimensions).
 
