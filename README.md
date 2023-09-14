@@ -1,7 +1,9 @@
 # LMdist
 LMdist is an unsupervised algorithm for correcting oversaturated pairwise distance and dissimilarity measures. Compatible with any pairwise beta diversity measure, LMdist will uncover underlying environmental gradients and resolve arches/horseshoes in ordination.
 
+
 ---
+
 
 ## Installation
 
@@ -9,7 +11,9 @@ As of now, the functions for using LMdist exist as R [^1] source code here on Gi
 
 [^1]: The source code was made using R 4.3.1, other versions of R may be incompatible. To check your R version, enter `R.version` in the console.
 
+
 ---
+
 
 ## Usage
 
@@ -24,7 +28,9 @@ lm.dist(distance_object)
 ```
 Continue below for descriptions of functions/parameters along with a more detailed tutorial.
 
+
 ---
+
 
 ## Introduction
 
@@ -34,11 +40,12 @@ Description of functions and parameters.
 
 | **Parameter** | **Description** |
 | ---------- | ---------- |
-| d | [required] Distance object or matrix to be adjusted |
-| neighborhood.radius | [optional, default: NULL] Radius value to determine neighborhoods (NULL if algorithm should pick) |
+| **d** | [required] Distance object or matrix to be adjusted |
+| **neighborhood.radius** | [optional, default: NULL] Radius value to determine neighborhoods (NULL if algorithm should pick) |
 | weighted | [optional, default: True] True/False use weighted edges in graph |
 | epsilon | [optional, default: 0.05] Amount by which a smaller radius must be better correlated with the PCoA distances |
 | phi | [optional, default: 0.10] Minimum graph degree:n ratio for which a radius is considered valid. |
+| **smooth** | [optional, default: F] Smooth results of multiple radii around the chosen "best" radius value. Best radius value is set to neighborhood.radius if a single value is provided, and 25 radii around this value are added to create a weighted average for smoothed results. |
 
 `lm.evaluate()` : Helper function called within `lm.dist()` which returns a graph & relevant information for a particular neighborhood radius.
 
@@ -48,7 +55,9 @@ Description of functions and parameters.
 
 `lm.smooth()` : Helper function called within `lm.dist()` to optionally smooth the results of multiple neighborhood radii.
 
+
 ---
+
 
 ## Tutorials
 
@@ -154,6 +163,8 @@ The distribution of distances also resembles the default algorithm.
 Smoothing can be applied to any LMdist output, including a user-provided radius value. The next tutorial with the `iris` dataset walks through applying a user-defined radius.
 
 
+---
+
 
 ### Iris tutorial
 
@@ -242,7 +253,9 @@ The distribution of distances is largely unchanged because the distinctive speci
 
 This example with the iris dataset shows how the LMdist algorithm may be used for exploration but is also an example of when the LMdist algorithm is not needed. The lack of oversaturation of distances means Euclidean distances are already representing sample relationships well (as expected from a dataset with only 4 initial dimensions).
 
+
 ---
+
 
 [^2]: Batterink M. & Wijffels G. (1983): Een vergelijkend vegetatiekundig onderzoek naar de typologie en invloeden van het beheer van 1973 tot 1982 in de duinweilanden op Terschelling. Report Agricultural University, Department of Vegetation Science, Plant Ecology and Weed Science, Wageningen.
 
