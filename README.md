@@ -77,7 +77,7 @@ dune.pc <- cmdscale(dune.d, k=2, eig=F)
 plot(dune.pc, pch=16, cex=2, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E")[dune.env$Moisture], xlab="PC 1", ylab="PC 2", main="Original PCoA (dune)")
 legend("topright", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), legend=levels(dune.env$Moisture), title="Moisture")
 ```
-![PCoA of dune dataset with Bray-Curtis distances. Samples arranged in a sparse arch formation.](tutorial_figs/dune_original_pcoa.png)
+![PCoA of dune dataset with Bray-Curtis dissimilarity. Samples arranged in a sparse arch formation.](tutorial_figs/dune_original_pcoa.png "PCoA (dune data)")
 
 
 We can see that the dataset may be presenting an arch-like geometry, largely driven by the moisture gradient. Since LMdist works best in correcting oversaturated distances, we can look at the distribution of distances to see if there is a bounded effect here.
@@ -86,6 +86,7 @@ We can see that the dataset may be presenting an arch-like geometry, largely dri
 # Distribution of distances
 plot(hist(dune.d, breaks=12), main="Distribution of Dissimilarities (dune)", xlab="Bray-Curtis Dissimilarity")
 ```
+![Distribution of Bray-Curtis dissimilarities present a slight left skew.](tutorial_figs/dune_original_distribution.png "Distribution of Bray-Curtis dissimilarities (dune data)")
 
 There appears to be a very slight left skew in this dataset, so we can try using LMdist to adjust distances. We are using the default algorithm which will try 50 radii values for adjusting distances and pick the one which represents true pairwise distances the best.
 
@@ -98,7 +99,7 @@ dune.lmd <- lm.dist(dune.d)
     [1] "new best r found --> 0.543"
 ```
 
-We can see the default algorithm chooses to adjust distances, picking a best radius of 0.543 for creating the underlying manifold graph. LEt's visualize these adjusted distances with PCoA.
+We can see the default algorithm chooses to adjust distances, picking a best radius of 0.543 for creating the underlying manifold graph. Let's visualize these adjusted distances with PCoA.
 
 ```r
 # Visualize the LMdist adjusted values with PCoA
@@ -109,6 +110,11 @@ legend("bottomleft", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), leg
 # Distribution of LMdist-adjusted distances
 plot(hist(dune.lmd, breaks=12), main="Distribution of LMdist-adjustment (dune)", xlab="LMdist-adjusted (r=0.543)")
 ```
+
+![PCoA of dune dataset with Lmdist-adjustment. Samples are more linearly arranged.](tutorial_figs/dune_lmdist_pcoa.png "LMdist PCoA (dune data)")
+
+![LMdist distribution of dissimilarities in the dune dataset reduces left skew.](tutorial_figs/dune_lmdist_distribution.png "LMdist distribution of dissimilarities (dune data)")
+
 
 The adjusted plot appears to have flattened the curve from the original PCoA along the x-axis (PC 1). Other variation in the samples is now represented by the second axis (PC 2), notably the variation in low moisture samples.
 
@@ -134,6 +140,10 @@ legend("bottomleft", pch=16, col=c("#1E7D7D","#319DDC","#E4AE54","#F5674E"), leg
 # Distribution of LMdist-adjusted distances (with smoothing)
 plot(hist(dune.lmd, breaks=12), main="Distribution of LMdist-adjustment (dune, smooth)", xlab="LMdist-adjusted (r=0.543, smooth)")
 ```
+
+![PCoA of dune dataset with Lmdist-adjustment and smoothing. Samples are more linearly arranged.](tutorial_figs/dune_lmdist_pcoa.png "LMdist smooth PCoA (dune data)")
+
+![LMdist distribution of dissimilarities in the dune dataset reduces left skew.](tutorial_figs/dune_lmdist_distribution.png "LMdist smooth distribution of dissimilarities (dune data)")
 
 Smoothing can be applied to any LMdist output, including a user-provided radius value. The next tutorial walks through applying a user-defined radius.
 
@@ -161,12 +171,16 @@ plot(iris.pc, pch=16, cex=1.5, col=c("purple","orange","blue")[factor(iris$Speci
 legend("bottomright", pch=16, col=c("purple","orange","blue"), legend=levels(factor(iris$Species)), title="Species")
 ```
 
+![PCoA of iris dataset with Euclidean distances forms three clusters by species.](tutorial_figs/iris_original_pcoa.png "PCoA (iris data)")
+
 Theses distances are also not oversaturated, no left skew is present.
 
 ```r
 # Density of distances
 plot(hist(iris.d, breaks=20), main="Distribution of Distances (iris)", xlab="Euclidean Distances")
 ```
+
+![Distribution of Euclidean distances in iris dataset looks normally distributed.](tutorial_figs/iris_original_distribution.png "Distribution of Euclidean distances (iris data)")
 
 It is therefore unsurprising that the LMdist default algorithm does not choose to adjust the distances, using a radius value of the maximum distance and therefore trusting all provided distances.
 
