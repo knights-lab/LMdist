@@ -118,7 +118,7 @@
     scree_tot <- c()
     for (i in 1:length(scree)) { scree_tot <- c(scree_tot, sum(scree[1:i])) }
     ndim <- min(which(scree_tot >= 0.8))
-    if (ndim == 1) { ndim <- 2 }
+    if (ndim <= 1 | is.na(ndim) | is.null(ndim)) { ndim <- 2 }
     corr <- round(cor(dist(pc$points[,1:ndim]), as.dist(lm_d), method="pearson"),3) # use correlation b/w PC & lmd dists as optimization func
   } else {
     lm_d <- NULL
