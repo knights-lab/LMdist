@@ -37,12 +37,15 @@
     stop("'weighted' must be logical type TRUE (default) or FALSE.")
   }
   ## make sure epsilon does not make it impossible to improve
-  tmp <- cmdscale(d, k=5)
-  tmp <- round(cor(dist(tmp), as.dist(d), method="pearson"),3)
-  if (((epsilon + tmp) > 0.995) & tmp < 0.99 ) {
-    warning(paste0("Epsilon too large for dataset, updated to ", round((1-tmp)/2, 3)))
-    epsilon <- round((1-tmp)/2, 3) # smaller epsilon (for smaller datasets with high correlation but arch present)
+  dim_og <- get.dims(d)
+  tmp <- dim_og[[1]]$points
+  tmp_ndim <- dim_og[[2]]
+  tmp <- round(cor(dist(tmp[,1:tmp_ndim]), as.dist(d), method="pearson"),3)
+  if (((epsilon + tmp) >= 0.995) & tmp < 0.99 ) {
+    warning(paste0("Epsilon too large for dataset, updated to ", round((1-tmp)/3, 3)))
+    epsilon <- round((1-tmp)/3, 3) # smaller epsilon (for smaller datasets with high correlation but arch present)
   }
+  if (tmp >= 0.99) {warning("Distances are already well correlated with PC space, LMdist might not be needed.")}
 
   #  Create connected graph with provided neighborhood range(s)
   ix <- 1         # index
@@ -58,6 +61,7 @@
       stop(paste0('Graph is invalid (r = ',ns,'), check all parameters are valid or try a different radius.'))
     }
     if (out[[3]] < phi) break
+    # new best found
     if ((out[[3]] >= phi) & (out[[4]] > (curr_corr + epsilon))) {
       if (ix == 1) {print(paste0("setting initial r as best --> ", round(ns,3)))}
       else {print(paste0("new best r found --> ", round(ns,3)))}
@@ -113,14 +117,10 @@
     # Compute the LMDist-adjusted distances
     lm_d <- shortest.paths(g)
     # Determine the best number of dimensions of PCoA with which to compare, the fewest number of dimensions (between 2 and 10) to describe >80% variance
-    pc <- suppressWarnings(cmdscale(lm_d, k=10, eig=T))
-    scree <- (pc$eig[1:10] / sum(pc$eig))
-    scree_tot <- c()
-    for (i in 1:length(scree)) { scree_tot <- c(scree_tot, sum(scree[1:i])) }
-    ndim <- min(which(scree_tot >= 0.8))
-    if (ndim <= 1 | is.na(ndim) | is.null(ndim)) { ndim <- 2 }
-    else if (ndim > 10) { ndim <- 10 }
-    corr <- round(cor(dist(pc$points[,1:ndim]), as.dist(lm_d), method="pearson"),3) # use correlation b/w PC & lmd dists as optimization func
+    tmppc <- get.dims(lm_d)
+    pc <- tmppc[[1]]
+    ndims <- tmppc[[2]]
+    corr <- round(cor(dist(pc$points[,1:ndims]), as.dist(lm_d), method="pearson"),3) # use correlation b/w PC & lmd dists as optimization func
   } else {
     lm_d <- NULL
     corr <- -1
@@ -185,4 +185,18 @@
   }
   ## (3) return in a distance object
   return(as.dist(means))
+}
+
+"get.dims" <- function (myd) {
+  # maximum of 10 dimensions
+  pc <- suppressWarnings(cmdscale(myd, k=10, eig=T))
+  # determine number of dimensions to use
+  scree <- (pc$eig[1:10] / sum(pc$eig))
+  scree_tot <- c()
+  for (i in 1:length(scree)) { scree_tot <- c(scree_tot, sum(scree[1:i])) }
+  ndim <- suppressWarnings(min(which(scree_tot >= 0.8)))
+  if (ndim <= 1 | is.na(ndim) | is.null(ndim)) { ndim <- 2 }
+  else if (ndim > 10) { ndim <- 10 }
+  # return results in list format
+  return(list(pc, ndim))
 }

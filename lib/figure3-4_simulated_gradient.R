@@ -4,7 +4,7 @@ library(scales)
 library(vegan)
 library(cowplot)
 library(data.table)
-source('lib/lgd_source.r')
+source('lib/lmdist_source.r')
 source('lib/figurehelper_pcoaplot.R')
 set.seed(125)
 
@@ -91,9 +91,9 @@ figure3b <- figure3b + coord_cartesian(xlim=c(1,231), clip="off") +
 # FIGURE 3 : Combine Coenoclines visualization & heatmap
 figure3a_gg <- ggdraw(figure3a)
 ## high resolution
-tiff("figures/tif_files/figure3_simdata_creation.tif", width=8, height=4, units="in", res=1200)
-cowplot::plot_grid(figure3a_gg, figure3b, nrow=1, labels="AUTO", rel_widths=c(1.2,1))
-dev.off()
+# tiff("figures/tif_files/figure3_simdata_creation.tif", width=8, height=4, units="in", res=1200)
+# cowplot::plot_grid(figure3a_gg, figure3b, nrow=1, labels="AUTO", rel_widths=c(1.2,1))
+# dev.off()
 ## low resolution
 tiff("figures/tif_files_low_res/figure3_simdata_creation_lowres.tif", width=8, height=4, units="in", res=350)
 cowplot::plot_grid(figure3a_gg, figure3b, nrow=1, labels="AUTO", rel_widths=c(1.2,1))
@@ -152,22 +152,22 @@ plot(figure4b)
 
 
 # After LMdist : PCoA
-lgd <- lg.dist(d, 0.4)
-pc_lgd <- cmdscale(lgd, k=10, eig=T)
-df_lgd <- as.data.frame(pc_lgd$points)
-colnames(df_lgd) <- paste0("PC",1:ncol(df_lgd))
-df_lgd$gradient <- rep(1:50, 2)
-var_lgd <- (pc_lgd$eig / sum(pc_lgd$eig)) * 100
-# plot(1:10, var_lgd[1:10], type="b", main="Stress Plot (After LMdist)", xlab="PC", ylab="Stress")
-mylim <- max(abs(as.matrix(df_lgd[,1:2])))
-figure4c <- ggplot(df_lgd, aes(x=PC1, y=PC2, col=gradient)) +
+lmd <- lm.dist(d, 0.4)
+pc_lmd <- cmdscale(lmd, k=10, eig=T)
+df_lmd <- as.data.frame(pc_lmd$points)
+colnames(df_lmd) <- paste0("PC",1:ncol(df_lmd))
+df_lmd$gradient <- rep(1:50, 2)
+var_lmd <- (pc_lmd$eig / sum(pc_lmd$eig)) * 100
+# plot(1:10, var_lmd[1:10], type="b", main="Stress Plot (After LMdist)", xlab="PC", ylab="Stress")
+mylim <- max(abs(as.matrix(df_lmd[,1:2])))
+figure4c <- ggplot(df_lmd, aes(x=PC1, y=PC2, col=gradient)) +
   geom_point(size=5, pch=20) +
   scale_color_viridis_c(alpha = 0.8, breaks=c(0,50), labels=c("","")) +
   xlim(-mylim, mylim) +
   ylim(-mylim, mylim) +
   labs(title="Simulated Gradient\nPCoA (LMdist-adjusted)",
-       x=paste0("PC 1 [", round(var_lgd[1],1), "%]"),
-       y=paste0("PC 2 [", round(var_lgd[2],1), "%]")) +
+       x=paste0("PC 1 [", round(var_lmd[1],1), "%]"),
+       y=paste0("PC 2 [", round(var_lmd[2],1), "%]")) +
   guides(col = guide_colorbar(barwidth = 8, barheight = 1)) +
   coord_fixed(ratio = 1) +
   theme_bw() +
@@ -175,23 +175,23 @@ figure4c <- ggplot(df_lgd, aes(x=PC1, y=PC2, col=gradient)) +
         legend.title = element_text(vjust=0.85, face="bold", size=12),
         title = element_text(face="bold", size=12),
         axis.title = element_text(size=10))
-adonis2(lgd ~ gradient, data = data.frame(id=rownames(dat), gradient=rep(1:50, 2))) # F score: 1778.6, p = 0.001
-cor.test(pc_lgd$points[,1], rep(1:50, 2))  # cor = 0.999, p < 2.2e-16
+adonis2(lmd ~ gradient, data = data.frame(id=rownames(dat), gradient=rep(1:50, 2))) # F score: 1778.6, p = 0.001
+cor.test(pc_lmd$points[,1], rep(1:50, 2))  # cor = 0.999, p < 2.2e-16
 
 
-# After LGD : Compare Community & Gradient Distances
-cg_lgd <- data.frame(comm=c(lgd), grad=c(vegdist(df_lgd$gradient, "euclidean")))
-figure4d <- ggplot(cg_lgd, aes(x=grad, y=comm)) +
+# After LMdist : Compare Community & Gradient Distances
+cg_lmd <- data.frame(comm=c(lmd), grad=c(vegdist(df_lmd$gradient, "euclidean")))
+figure4d <- ggplot(cg_lmd, aes(x=grad, y=comm)) +
   geom_point(size=2, color=alpha("orange", 0.2)) +
   geom_smooth(color="black", size=1, method="gam") +
   labs(x="Gradient Distances\n(Euclidean)", y="Community Distances\n(LMdist-adjusted)", color="") +
   theme_bw() +
   theme(axis.title = element_text(size=12))
 xdens4d <- axis_canvas(figure4d, axis = "x") +
-  geom_density(data = cg_lgd, aes(grad),
+  geom_density(data = cg_lmd, aes(grad),
                alpha = 0.4, size = 1, color = "darkgrey", fill="darkgrey")
 ydens4d <- axis_canvas(figure4d, axis = "y", coord_flip = TRUE) +
-  geom_density(data = cg_lgd, aes(comm),
+  geom_density(data = cg_lmd, aes(comm),
                alpha = 0.4, size = 1, color="orange", fill="orange") +
   coord_flip()
 figure4d <- insert_xaxis_grob(figure4d, xdens4d, grid::unit(.2, "null"), position = "top")
@@ -201,9 +201,9 @@ plot(figure4d)
 
 # FIGURE 4: Applying LMdist to simulated gradient
 ## high resolution
-tiff("figures/tif_files/figure4_simdata_lmdist.tif", width=8, height=8, units="in", res=1200)
-cowplot::plot_grid(figure4a, figure4b, figure4c, figure4d, nrow=2, labels="AUTO")
-dev.off()
+# tiff("figures/tif_files/figure4_simdata_lmdist.tif", width=8, height=8, units="in", res=1200)
+# cowplot::plot_grid(figure4a, figure4b, figure4c, figure4d, nrow=2, labels="AUTO")
+# dev.off()
 ## low resolution
 tiff("figures/tif_files_low_res/figure4_simdata_lmdist_lowres.tif", width=8, height=8, units="in", res=350)
 cowplot::plot_grid(figure4a, figure4b, figure4c, figure4d, nrow=2, labels="AUTO")

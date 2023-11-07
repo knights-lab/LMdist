@@ -6,7 +6,7 @@ library(vegan)
 library(scales)
 library(gtools)
 library(ggplot2)
-source("lib/lgd_source.r")
+source("lib/lmdist_source.r")
 set.seed(125)
 
 
@@ -105,7 +105,7 @@ par(mfrow=c(1,1),mar=c(5.1,4.1,4.1,2.1), mgp=c(3,1,0))
 # Compare just Aitchison distance and LMdist
 aitch <- vegdist(mymat+0.000000001, method="aitchison")
 pc_aitch <- cmdscale(aitch, k=2)
-lmd <- lg.dist(aitch, smooth=T) # chose 150.46
+lmd <- lm.dist(aitch, smooth=T) # chose not to adjust
 pc_lmd <- cmdscale(lmd, k=2)
 ## plotting
 simple_2dplot <- function (mypc, mytitle) {
@@ -145,7 +145,7 @@ whit2_before <- pcoa_plot(whit_d, whit2_col, whit2_col, whit2_shp, 4,
                           mg, mg, mg,
                           "Whittaker Table 3 (Bray-Curtis)", "Moisture", discrete=T)
 ## After (LMdist)
-whit2_lmd <- lg.dist(whit_d)
+whit2_lmd <- lm.dist(whit_d) # chooses 0.633
 whit2_after <- pcoa_plot(whit2_lmd, whit2_col, whit2_col, whit2_shp, 4,
                          mg, mg, mg,
                          "Whittaker Table 3 (LMDist-adjusted)", "Moisture", discrete=T)
@@ -171,7 +171,7 @@ imp_before <- pcoa_plot(imp, imp_col, imp_col, imp_shp, 2,
                         meta_imp$Sample.Group, meta_imp$Sample.Group, meta_imp$Sample.Group,
                         "Immigration (Unw. UniFrac)", "Group", discrete=T)
 ## After (LMdist)
-imp_lmd <- lg.dist(imp, epsilon=0.1)
+imp_lmd <- lm.dist(imp, epsilon=0.1)
 imp_after <- pcoa_plot(imp, imp_col, imp_col, imp_shp, 2,
                        meta_imp$Sample.Group, meta_imp$Sample.Group, meta_imp$Sample.Group,
                        "Immigration (LMdist-adjusted)", "Group", discrete=T)
@@ -192,7 +192,7 @@ gg_before <- pcoa_plot(d_hg, pop_cols, pop_cols, rep(16, 3), 2,
                        meta_hg$geo_loc_name, meta_hg$geo_loc_name, meta_hg$geo_loc_name,
                        "Global Gut (Unw. UniFrac)", "Population", discrete=T)
 ## After (LMdist)
-hg_lmd <- lg.dist(d_hg, phi=0.2)
+hg_lmd <- lm.dist(d_hg)
 gg_after <- pcoa_plot(hg_lmd, pop_cols, pop_cols, rep(16, 3), 2,
                       meta_hg$geo_loc_name, meta_hg$geo_loc_name, meta_hg$geo_loc_name,
                       "Global Gut (LMdist-adjusted)", "Population", discrete=T)
@@ -200,15 +200,16 @@ gg_after <- pcoa_plot(hg_lmd, pop_cols, pop_cols, rep(16, 3), 2,
 
 ##### FIGURE SUPPLEMENTAL 3 #####
 library(cowplot)
+library(gridGraphics)
 supp3a <- ggdraw(supp3a)
 ## combined plot
 left <- cowplot::plot_grid(supp3a, supp3b, supp3c, nrow=3, rel_heights=c(2,1,0.5), labels="AUTO")
 right <- cowplot::plot_grid(imp_before, imp_after, gg_before, gg_after, whit2_before, whit2_after,
                             nrow=3, ncol=2, labels=c("D","","E","","F",""))
 ## high res
-tiff("figures/tif_files/suppfig3_clusters.tif", width=14, height=12, unit="in", res=1200)
-cowplot::plot_grid(left, right, nrow=1, rel_widths=c(1,2))
-dev.off()
+# tiff("figures/tif_files/suppfig3_clusters.tif", width=14, height=12, unit="in", res=1200)
+# cowplot::plot_grid(left, right, nrow=1, rel_widths=c(1,2))
+# dev.off()
 ## low res
 tiff("figures/tif_files_low_res/suppfig3_clusters_lowres.tif", width=14, height=12, unit="in", res=350)
 cowplot::plot_grid(left, right, nrow=1, rel_widths=c(1,2))

@@ -1,4 +1,5 @@
 # Figure 4 : Swiss Roll dataset & Comparison to popular Manifold Learning
+# note: best to run within Rstudio to see the 3D plot rendering
 
 library(vegan)
 library(Rtsne)
@@ -6,7 +7,7 @@ library(scales)
 library(ggplot2)
 library(plotly)
 library(cowplot)
-source("lib/lgd_source.r")
+source("lib/lmdist_source.r")
 set.seed(125)
 
 # Loading Dataset
@@ -67,14 +68,14 @@ swiss_isomap <- isomap(swiss_euc, ndim=2, k=5)
 fig5d <- plot2d(swiss_isomap$points, "Swiss Roll Isomap", "Axis", F)
 
 # PCA w/ LMdist
-swiss_ldist <- lg.dist(swiss_euc, 6.2, phi=0)
-swiss_lgd <- cmdscale(swiss_ldist, k=2, eig=F)
-fig5e <- plot2d(swiss_lgd, "Swiss Roll LMdist", "PC", F)
+swiss_lmdist <- lm.dist(swiss_euc, 6.2, phi=0)
+swiss_lmd <- cmdscale(swiss_lmdist, k=2, eig=F)
+fig5e <- plot2d(swiss_lmd, "Swiss Roll LMdist", "PC", F)
 
 # Statistics : PC1 & manifold
 manifold <- c(read.delim("data/swiss_roll/swiss_roll_manifold.txt", sep=" ", header=F)[,1])
 adonis2(swiss_euc ~ manifold)   # F score: 5.51, p = 0.002
-adonis2(swiss_ldist ~ manifold) # F score: 3475.9, p = 0.001
+adonis2(swiss_lmdist ~ manifold) # F score: 3475.9, p = 0.001
 
 # FIGURE 5 : Swiss roll dataset
 ## saving the 3d original plot bby hand in R viewer
@@ -85,9 +86,9 @@ s <- ggplot() + theme_void()
 toprow <- cowplot::plot_grid(s, s, fig5b, s, labels=c("","A","B",""), nrow=1, rel_widths=c(0.5,1,1,0.5))
 bottomrow <- cowplot::plot_grid(fig5c, fig5d, fig5e, labels=c("C","D","E"), nrow=1)
 ## high res
-tiff("figures/tif_files/figure5_swiss_roll.tif", width=8, height=5.5, unit="in", res=1200)
-cowplot::plot_grid(toprow, bottomrow, nrow=2)
-dev.off()
+# tiff("figures/tif_files/figure5_swiss_roll.tif", width=8, height=5.5, unit="in", res=1200)
+# cowplot::plot_grid(toprow, bottomrow, nrow=2)
+# dev.off()
 ## low res
 tiff("figures/tif_files_low_res/figure5_swiss_roll_lowres.tif", width=8, height=5.5, unit="in", res=350)
 cowplot::plot_grid(toprow, bottomrow, nrow=2)

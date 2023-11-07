@@ -7,11 +7,11 @@ library(vegan)
 library(ggplot2)
 library(cowplot)
 library(ggpubr)
-source('lib/lgd_source.r')
+source('lib/lmdist_source.r')
 set.seed(125)
 
 # Small set of simulated data points
-mini_sim <-read.table("data/old_gradient/fake_rel_abun_long_n100.txt", row=1, header=T, sep="\t")
+mini_sim <-read.table("data/simgradient/fake_rel_abun_long_n100.txt", row=1, header=T, sep="\t")
 mini_sim <- mini_sim[c(1,12,19,31,43,50,61,72,80,92,100),]
 mini_col_num <- factor(c(1,12,19,31,43,50,61,72,80,92,100))
 mini_cols <- viridis::viridis(11, alpha=0.8)
@@ -36,11 +36,11 @@ figure2a <- ggplot(mini_pc_df, aes(x=PC1, y=PC2, color=mycolor)) +
 
 
 ## FIGURE 2F: After plot
-mini_lgd <- lg.dist(mini_d, neighborhood.radius=0.18)
-mini_pc_lgd <- cmdscale(mini_lgd, k=2, eig=F)
-mini_lgd_df <- data.frame(PC1=mini_pc_lgd[,1], PC2=mini_pc_lgd[,2], mycolor=mini_col_num)
-lim <- max(abs(mini_pc_lgd)) + 0.02
-figure2f <- ggplot(mini_lgd_df, aes(x=PC1, y=PC2, color=mycolor)) +
+mini_lmd <- lm.dist(mini_d, neighborhood.radius=0.18)
+mini_pc_lmd <- cmdscale(mini_lmd, k=2, eig=F)
+mini_lmd_df <- data.frame(PC1=mini_pc_lmd[,1], PC2=mini_pc_lmd[,2], mycolor=mini_col_num)
+lim <- max(abs(mini_pc_lmd)) + 0.02
+figure2f <- ggplot(mini_lmd_df, aes(x=PC1, y=PC2, color=mycolor)) +
   geom_point(size = 8, pch = 16) +
   scale_color_manual(values=mini_cols) +
   xlim(-lim, lim) +
@@ -109,10 +109,10 @@ figure2b_gg <- ggdraw(figure2b, xlim=c(0.1,0.9), ylim=c(0.1,0.9), clip = "on")
 figure2c_gg <- ggdraw(figure2c, xlim=c(0.1,0.9), ylim=c(0.1,0.9), clip = "on")
 figure2d_gg <- ggdraw(figure2d, xlim=c(0.1,0.9), ylim=c(0.1,0.9), clip = "on")
 figure2e_gg <- ggdraw(figure2e, xlim=c(0.1,0.9), ylim=c(0.1,0.9), clip = "on")
-tiff("figures/tif_files/figure2_algorithm.tif", width=9, height=6, unit="in", res=1200)
-cowplot::plot_grid(figure2a, figure2b_gg, figure2c_gg, figure2d_gg, figure2e_gg, figure2f,
-                  nrow = 2, labels="AUTO")
-dev.off()
+# tiff("figures/tif_files/figure2_algorithm.tif", width=9, height=6, unit="in", res=1200)
+# cowplot::plot_grid(figure2a, figure2b_gg, figure2c_gg, figure2d_gg, figure2e_gg, figure2f,
+#                   nrow = 2, labels="AUTO")
+# dev.off()
 
 # Low resolution version
 tiff("figures/tif_files_low_res/figure2_algorithm_lowres.tif", width=9, height=6, unit="in", res=350)
